@@ -15,7 +15,7 @@ from texture import *
 #define scenes here
 # TODO: make scenes.py a parser with a text scenefile input 
 
-def random_scene():
+def random_scene(aspect_ratio):
     hit_object_list = []
     checker = checker_texture(constant_texture(vec3(0.2,0.3,0.1)), constant_texture(vec3(0.9,0.9,0.9)))
     hit_object_list.append(sphere(vec3(0,-1000,0),1000,lambertian(checker)))
@@ -42,7 +42,14 @@ def random_scene():
     hit_object_list.append(sphere( vec3(0, 1, 0), 1.0, dielectric(1.5) ))
     hit_object_list.append(sphere( vec3(-4, 1, 0 ), 1.0, lambertian(constant_texture(vec3(0.4, 0.2, 0.1)))))
     hit_object_list.append(sphere( vec3(4, 1, 0), 1.0, metal(vec3(0.7,0.6,0.5),0.0)))
-    return hit_object_list
+
+    lookfrom = vec3(12,2,3)
+    lookat = vec3(0,0,0)
+    dist_to_focus = 10
+    aperture = 0.1
+    vfov = 20
+    cam = camera(lookfrom,lookat,vec3(0,1,0),vfov,aspect_ratio,aperture,dist_to_focus,0.0,1.0)
+    return hit_object_list,cam
 
 def two_spheres():
     hit_object_list = []
@@ -84,8 +91,9 @@ def simple_light():
 
     return hit_object_list
 
-def cornell_box():
+def cornell_box(aspect_ratio):
     hit_object_list = []
+
     mat_red = lambertian(constant_texture(vec3(0.65,0.05,0.05)))
     mat_white = lambertian(constant_texture(vec3(0.73,0.73,0.73)))
     mat_green = lambertian(constant_texture(vec3(0.12,0.45,0.15)))
@@ -104,7 +112,14 @@ def cornell_box():
     hit_object_list.append(translate(rotate_y(box(vec3(0, 0, 0), vec3(165, 165, 165), mat_white),-18), vec3(130,0,65)))
     hit_object_list.append(translate(rotate_y(box(vec3(0, 0, 0), vec3(165, 330, 165), mat_white),15), vec3(265,0,295)))
 
-    return hit_object_list
+    lookfrom = vec3(278,278,-800)
+    lookat = vec3(278,278,0)
+    dist_to_focus = 10
+    aperture = 0 
+    vfov = 40
+    cam = camera(lookfrom,lookat,vec3(0,1,0),vfov,aspect_ratio,aperture,dist_to_focus,0.0,1.0)
+
+    return hit_object_list,cam 
 
 def cornell_smoke():
     hit_object_list = []
