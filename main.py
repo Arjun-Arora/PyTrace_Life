@@ -23,11 +23,13 @@ def color(r: ray, world: list,depth = 0,max_depth = 4):
     hit_anything,rec = hitable_list(world).hit(r,0.001,MAX_FLOAT)
     if (hit_anything):
         scattered = ray(vec3(0,0,0),vec3(0,0,0),0.0)
-        attenuation = vec3(0,0,0)
-        if_scatter,(scattered,attenuation) = rec.mat.scatter(r,rec)
+        albedo = vec3(0,0,0)
+        pdf = 0.0
+        if_scatter,(scattered,albedo,pdf) = rec.mat.scatter(r,rec)
         emitted = rec.mat.emitted(rec.u,rec.v,rec.p)
+        scattering_pdf = rec.mat.scattering_pdf(r,rec,scattered)
         if (depth < max_depth and if_scatter):
-            return emitted + attenuation * color( scattered,world,depth + 1,max_depth)
+            return emitted + albedo * scattering_pdf * color( scattered,world,depth + 1,max_depth) / pdf
         else:
             return emitted
     else:
@@ -79,9 +81,9 @@ def main(filename: str = 'output',output_res: tuple = (200,100),num_samples= 100
 if  __name__ == "__main__":
     #cProfile.runctx('main()',None,("random_spheres",(200,100),64))
     #main("./unit_tests/random_spheres_unit_test",(200,100),64)
-    #main("./test",output_res = (400,300),num_samples = 1024)
+    main("./test",output_res = (256,128),num_samples = 1024)
     #main("./test",output_res = (800,800),num_samples = 2048)
-    main("./test",output_res = (500,500),num_samples = 100)
+    #main("./test",output_res = (500,500),num_samples = 256)
     # 00:00:43 1118.0 it/s
 
 

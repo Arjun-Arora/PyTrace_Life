@@ -57,7 +57,7 @@ class material(ABC):
 	'''
 	returns whether we scatter, along with scattered spectra and attentuated spectra
 	'''
-	def scatter(r: ray, rec):
+	def scatter(r_in: ray, rec):
 		pass
 	'''
 	base function so non-emissive materials don't emit anything
@@ -65,15 +65,24 @@ class material(ABC):
 	def emitted(self,u: float, v: float, p: vec3):
 		return vec3(0,0,0)
 
+	def scattering_pdf(self,r_in: ray,rec, scattered: ray):
+		return 0.0
 
 class lambertian(material):
 	def __init__(self,albedo: texture):
 		self.albedo = albedo
+	def scattering_pdf(self,r_in: ray,rec, scattered: ray):
+		cosine = rec.normal.dot(unit_vector(scattered.direction))
+		if cosine < 0:
+			cosine = 0
+		return cosine/math.pi
+	# now returns True, (scattered,albedo and pdf)
 	def scatter(self,r_in: ray, rec):
 		target = rec.p + rec.normal + random_unit_sphere()
 		scattered = ray(rec.p,target - rec.p,r_in.time)
-		attenuation = self.albedo.value(rec.u,rec.v,rec.p)
-		return True,(scattered,attenuation)
+		alb = self.albedo.value(rec.u,rec.v,rec.p)
+		pdf = rec.normal.dot(scattered.direction)/math.pi
+		return True,(scattered,alb,pdf)
 
 class metal(material):
 	def __init__(self,albedo: vec3,f: float = 0.0):
@@ -138,7 +147,7 @@ class diffuse_light(material):
 		'''
 		diffuse light do not reflect, simply emit
 		'''
-		return False,(0,0)
+		return False,(0,0,0)
 	def emitted(self,u: float, v: float, p: vec3 ):
 		'''
 		return color associated w/ texture
