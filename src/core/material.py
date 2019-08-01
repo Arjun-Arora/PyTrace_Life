@@ -64,6 +64,7 @@ class material(ABC):
 class lambertian(material):
 	def __init__(self,albedo: texture):
 		self.albedo = albedo
+		self.uvw = onb()
 	def scattering_pdf(self,r_in: ray,rec, scattered: ray):
 		cosine = rec.normal.dot(unit_vector(scattered.direction))
 		if cosine < 0:
@@ -71,12 +72,12 @@ class lambertian(material):
 		return cosine/math.pi
 	# now returns True, (scattered,albedo and pdf)
 	def scatter(self,r_in: ray, rec):
-		uvw = onb()
-		uvw.build_from_w(rec.normal)
-		direction = uvw.local(random_cosine_direction())
+		#uvw = onb()
+		self.uvw.build_from_w(rec.normal)
+		direction = self.uvw.local(random_cosine_direction())
 		scattered = ray(rec.p,unit_vector(direction),r_in.time)
 		alb = self.albedo.value(rec.u,rec.v,rec.p)
-		pdf = (uvw.axis[2].dot(scattered.direction)) / math.pi
+		pdf = (self.uvw.axis[2].dot(scattered.direction)) / math.pi
 		return True,(scattered,alb,pdf)
 		# target = rec.p + rec.normal + random_unit_sphere()
 		# scattered = ray(rec.p,unit_vector(target-rec.p),r_in.time)
