@@ -3,12 +3,13 @@ from math import *
 from hitable import * 
 from geometry import *
 from texture import * 
+from random_functions import * 
 from abc import ABC,abstractmethod
 import random
 
 
 '''
-reflectivity polynomial approximation
+reflectivity polynomial appoximation
 by Christophe Schlick
 '''
 
@@ -24,14 +25,6 @@ def reflect(incoming_vector: vec3, normal: vec3):
 	outgoing_vector = incoming_vector - 2 * incoming_vector.dot(normal) * normal;
 	return outgoing_vector
 
-'''
-randomly sample a direction on the unit sphere
-'''
-def random_unit_sphere():
-    p = vec3(1,1,1)
-    while p.squared_length() >= 1.0:
-        p = 2.0 * vec3(random.random(),random.random(),random.random()) - vec3(1.0,1.0,1.0)
-    return p 
 
 '''
 refract and return refracted vector
@@ -78,11 +71,18 @@ class lambertian(material):
 		return cosine/math.pi
 	# now returns True, (scattered,albedo and pdf)
 	def scatter(self,r_in: ray, rec):
-		target = rec.p + rec.normal + random_unit_sphere()
-		scattered = ray(rec.p,unit_vector(target-rec.p),r_in.time)
+		uvw = onb()
+		uvw.build_from_w(rec.normal)
+		direction = uvw.local(random_cosine_direction())
+		scattered = ray(rec.p,unit_vector(direction),r_in.time)
 		alb = self.albedo.value(rec.u,rec.v,rec.p)
-		pdf = (rec.normal.dot(scattered.direction))/math.pi
+		pdf = (uvw.axis[2].dot(scattered.direction)) / math.pi
 		return True,(scattered,alb,pdf)
+		# target = rec.p + rec.normal + random_unit_sphere()
+		# scattered = ray(rec.p,unit_vector(target-rec.p),r_in.time)
+		# alb = self.albedo.value(rec.u,rec.v,rec.p)
+		# pdf = (rec.normal.dot(scattered.direction))/math.pi
+		# return True,(scattered,alb,pdf)
 
 class metal(material):
 	def __init__(self,albedo: vec3,f: float = 0.0):

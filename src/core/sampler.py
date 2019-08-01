@@ -63,3 +63,6 @@ class stratified_sampler_2D(sampler):
 
 
 
+
+
+

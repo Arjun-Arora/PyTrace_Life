@@ -124,4 +124,23 @@ class ray:
     def __call__(self,t):
         return self.origin + (t * self.direction)
 
+class onb:
+    def __init__(self):
+        self.axis = [None] * 3
+    def build_from_w(self,n: vec3):
+        #print(n)
+        self.axis[2] = unit_vector(n)
+        a = None 
+        if abs(self.axis[2][0]) > 0.9:
+            a = vec3(0,1,0)
+        else:
+            a = vec3(1,0,0)
+        # print(self.axis[2])
+        # print(a)
+        # print(self.axis[2].cross(a))
+        self.axis[1] = unit_vector(self.axis[2].cross(a))
+        self.axis[0] = self.axis[2].cross(self.axis[1])
+    def local(self,a: vec3):
+        return a[0] * self.axis[0] +  a[1] * self.axis[1] + a[2] * self.axis[2]
+
 
