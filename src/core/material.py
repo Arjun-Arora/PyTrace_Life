@@ -58,7 +58,7 @@ class material(ABC):
 	returns whether we scatter, along with scattered spectra and attentuated spectra
 	'''
 	def scatter(r_in: ray, rec):
-		pass
+		return False,(0,0,0)
 	'''
 	base function so non-emissive materials don't emit anything
 	'''
@@ -74,14 +74,14 @@ class lambertian(material):
 	def scattering_pdf(self,r_in: ray,rec, scattered: ray):
 		cosine = rec.normal.dot(unit_vector(scattered.direction))
 		if cosine < 0:
-			cosine = 0
+			cosine = 0.0
 		return cosine/math.pi
 	# now returns True, (scattered,albedo and pdf)
 	def scatter(self,r_in: ray, rec):
 		target = rec.p + rec.normal + random_unit_sphere()
-		scattered = ray(rec.p,target - rec.p,r_in.time)
+		scattered = ray(rec.p,unit_vector(target-rec.p),r_in.time)
 		alb = self.albedo.value(rec.u,rec.v,rec.p)
-		pdf = rec.normal.dot(scattered.direction)/math.pi
+		pdf = (rec.normal.dot(scattered.direction))/math.pi
 		return True,(scattered,alb,pdf)
 
 class metal(material):
