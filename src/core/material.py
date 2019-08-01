@@ -55,7 +55,7 @@ class material(ABC):
 	'''
 	base function so non-emissive materials don't emit anything
 	'''
-	def emitted(self,u: float, v: float, p: vec3):
+	def emitted(self, r_in: ray, rec,u: float, v: float, p: vec3):
 		return vec3(0,0,0)
 
 	def scattering_pdf(self,r_in: ray,rec, scattered: ray):
@@ -149,12 +149,15 @@ class diffuse_light(material):
 		diffuse light do not reflect, simply emit
 		'''
 		return False,(0,0,0)
-	def emitted(self,u: float, v: float, p: vec3 ):
+	def emitted(self, r_in: ray, rec,u: float, v: float, p: vec3 ):
 		'''
 		return color associated w/ texture
 
 		'''
-		return self.emit.value(u,v,p)
+		if rec.normal.dot(r_in.direction) < 0.0:
+			return self.emit.value(u,v,p)
+		else:
+			return vec3(0,0,0)
 
 
 '''
