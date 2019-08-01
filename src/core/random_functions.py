@@ -1,6 +1,9 @@
 from geometry import * 
 from math import *
+from hitable import * 
 import random
+from abc import ABC,abstractmethod
+
 
 '''
 randomly sample direction through unit disk
@@ -31,3 +34,52 @@ def random_cosine_direction():
 	x = cos(phi) * 2 * sqrt(r2)
 	y = sin(phi) * 2 * sqrt(r2)
 	return vec3(x,y,z)
+
+class pdf(ABC):
+	def __init__(self):
+		pass
+	def value(self,direction: vec3):
+		return 0
+	def generate(self):
+		return 0
+
+class cosine_pdf(pdf):
+	def __init__(self,w: vec3):
+		self.uvw = onb()
+		self.uvw.build_from_w(w)
+	def value(self,direction: vec3):
+		cosine = unit_vector(direction).dot(self.uvw.axis[2])
+		if cosine > 0.0:
+			return cosine/pi
+		else:
+			return 0.0
+	def generate(self):
+		return self.uvw.local(random_cosine_direction())
+
+class hitable_pdf(pdf):
+	def __init__(self,p, origin: vec3):
+		self.p = p
+		self.o = origin
+	def value(self,direction):
+		return self.p.pdf_value(self.o,direction)
+	def generate(self):
+		return self.p.random_gen(self.o)
+
+class mixture_pdf(pdf):
+	def __init__(self,p0: pdf,p1: pdf):
+		self.p = []
+		self.p.append(p0)
+		self.p.append(p1)
+	def value(self,direction: vec3):
+		return 0.5 * self.p[0].value(direction) + 0.5 * self.p[1].value(direction)
+	def generate(self):
+		if random.random() < 0.5:
+			return self.p[0].generate()
+		else:
+			return self.p[1].generate() 
+
+
+
+
+
+

@@ -113,7 +113,7 @@ def unit_vector(vec: vec3):
     return vec/vec.length()
 
 class ray:
-    def __init__(self,a: vec3, b: vec3,time: float):
+    def __init__(self,a: vec3, b: vec3,time: float = 0.0):
         self.origin = a
         self.direction = b
         self.time = time

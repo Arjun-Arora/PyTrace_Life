@@ -31,6 +31,10 @@ class hitable(ABC):
 		pass
 	def bounding_box(self, t0: float, t1: float):
 		pass
+	def pdf_value(self,o: vec3,v: vec3):
+		return 0.0
+	def random(self,o:vec3):
+		return vec3(1,0,0)
 
 def ffmin(a: float, b: float):
 	return (b,a )[a < b]

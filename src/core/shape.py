@@ -159,6 +159,23 @@ class xz_rect(hitable):
 	def bounding_box(self,t0: float, t1: float ): 
 		box = aabb(vec3(self.x0,self.k-0.0001,self.z0),vec3(self.x1,self.k + 0.0001,self.z1))
 		return (True,box)
+	def pdf_value(self,o: vec3, v: vec3):
+		rec = hit_record()
+		is_hit,rec = self.hit(ray(o,v),0.001,FLT_MAX)
+		if is_hit:
+			area = (self.x1-self.x0) * (self.z1-self.z0)
+			distance_squared = rec.t * rec.t * (v.length() ** 2 )
+			cosine = abs(v.dot(rec.normal)) / v.length()
+			return distance_squared / (cosine * area)
+		else: 
+			return 0
+	def random_gen(self,o: vec3):
+		random_point = vec3(self.x0 + random.random() * (self.x1-self.x0),
+							self.k,
+							self.z0 + random.random() * (self.z1 - self.z0))
+		return random_point - o
+
+
 
 
 '''

@@ -24,27 +24,20 @@ def color(r: ray, world: list,depth = 0,max_depth = 4):
     if (hit_anything):
         scattered = ray(vec3(0,0,0),vec3(0,0,0),0.0)
         albedo = vec3(0,0,0)
-        pdf = 0.0
-        if_scatter,(scattered,albedo,pdf) = rec.mat.scatter(r,rec)
+        pdf_val = 0.0
+        if_scatter,(scattered,albedo,pdf_val) = rec.mat.scatter(r,rec)
         emitted = rec.mat.emitted(r,rec,rec.u,rec.v,rec.p)
-        scattering_pdf = rec.mat.scattering_pdf(r,rec,scattered)
         if (depth < max_depth and if_scatter):
 
-            # hard coding to always pick light direction
-            on_light = vec3(213 + random.random() * (343-213), 554,227 + random.random() *(332 - 227))
-            to_light = on_light - rec.p
-            distance_squared = to_light.length() ** 2 
-            to_light = unit_vector(to_light)
-            if to_light.dot(rec.normal) < 0:
-                return emitted
-            light_area = (343 - 213) * (332 - 227)
-            light_cosine = abs(to_light[1])
-            if light_cosine < 0.0000001:
-                return emitted
-            pdf = distance_squared / (light_cosine * light_area)
-            scattered = ray(rec.p,to_light,r.time)
+            light_shape = xz_rect(213,343,227,332,554,0)
+            p0 = hitable_pdf(light_shape,rec.p)
+            p1 = cosine_pdf(rec.normal)
+            p = mixture_pdf(p0,p1)
+            scattered = ray(rec.p,p.generate(),r.time)
+            pdf_val = p.value(scattered.direction)
+            scattering_pdf = rec.mat.scattering_pdf(r,rec,scattered)
 
-            return emitted + albedo * scattering_pdf * color( scattered,world,depth + 1,max_depth) / pdf
+            return emitted + albedo * scattering_pdf * color( scattered,world,depth + 1,max_depth) / pdf_val
         else:
             return emitted
     else:
@@ -97,7 +90,9 @@ if  __name__ == "__main__":
     #main("./test_large",output_res = (800,800),num_samples = 1024)
     #main("./test_medium",output_res = (500,500),num_samples = 1024)
     #main("./test_small",output_res = (400,300),num_samples = 1024)
-    main("./test_large_imp",output_res = (1200,800),num_samples = 10)
+    #main("./test_large_imp",output_res = (1200,800),num_samples = 10)
+    main("./test_small",output_res = (400,300),num_samples = 1024)
+
 
 
 
