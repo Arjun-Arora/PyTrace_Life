@@ -82,9 +82,9 @@ if  __name__ == "__main__":
     #cProfile.runctx('main()',None,("random_spheres",(200,100),64))
     #main("./unit_tests/random_spheres_unit_test",(200,100),64)
     #main("./test",output_res = (256,128),num_samples = 1024)
-    main("./test_bug",output_res = (256,128),num_samples = 1024)
+    #main("./test_bug",output_res = (256,128),num_samples = 1024)
     #main("./test",output_res = (800,800),num_samples = 2048)
-    #main("./test",output_res = (500,500),num_samples = 256)
+    main("./test",output_res = (500,500),num_samples = 1024)
     # 00:00:43 1118.0 it/s
 
 
