@@ -103,11 +103,16 @@ def cornell_box(aspect_ratio):
     hit_object_list.append(yz_rect(0,555,0,555,0,mat_red))
     #flip normals on light so they point in -y direction
     hit_object_list.append(flip_normals(xz_rect(213,343,227,332,554,mat_light))) 
-    
+
     hit_object_list.append(flip_normals(xz_rect(0,555,0,555,555,mat_white)))
     hit_object_list.append(xz_rect(0,555,0,555,0,mat_white))
     hit_object_list.append(flip_normals(xy_rect(0,555,0,555,555,mat_white)))
-    hit_object_list.append(translate(rotate_y(box(vec3(0, 0, 0), vec3(165, 165, 165), mat_white),-18), vec3(130,0,65)))
+    #hit_object_list.append(translate(rotate_y(box(vec3(0, 0, 0), vec3(165, 165, 165), mat_white),-18), vec3(130,0,65)))
+
+    mat_glass = dielectric(1.5)
+    hit_object_list.append(sphere(vec3(190,90,190),90, mat_glass))
+
+    #mat_aluminum = metal(vec3(0.8,0.85,0.88),0.0)
     hit_object_list.append(translate(rotate_y(box(vec3(0, 0, 0), vec3(165, 330, 165), mat_white),15), vec3(265,0,295)))
 
     lookfrom = vec3(278,278,-800)

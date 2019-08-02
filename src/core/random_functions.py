@@ -78,6 +78,17 @@ class mixture_pdf(pdf):
 		else:
 			return self.p[1].generate() 
 
+def random_to_sphere(radius: float, distance_squared: float): 
+	# print("radius: {}, distance_squared: {}" .format(radius,distance_squared))
+	# print("{}".format((radius ** 2)/distance_squared))
+	r1 = random.random()
+	r2 = random.random()
+	z = 1 + r2 * (sqrt(1 - (radius * radius)/distance_squared) - 1)
+	phi = 2 * pi * r1
+	x = cos(phi)*sqrt(1 - z * z)
+	y = sin(phi) * sqrt(1 - z * z)
+	return vec3(x,y,z)
+
 
 
 

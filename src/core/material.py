@@ -8,6 +8,16 @@ from abc import ABC,abstractmethod
 import random
 
 
+class scatter_rec(ABC):
+	def __init__(self,specular: ray = ray(vec3(0.0,0.0,0.0),vec3(0.0,0.0,0.0)),
+					  is_specular: bool = False,attenuation: vec3 = vec3(0,0,0),
+					 prob_density: pdf = None): 
+		self.specular = specular
+		self.is_specular = is_specular
+		self.attenuation = attenuation
+		self.prob_density = pdf 
+
+
 '''
 reflectivity polynomial appoximation
 by Christophe Schlick
@@ -50,7 +60,7 @@ class material(ABC):
 	'''
 	returns whether we scatter, along with scattered spectra and attentuated spectra
 	'''
-	def scatter(r_in: ray, rec):
+	def scatter(r_in: ray, hrec):
 		return False,(0,0,0)
 	'''
 	base function so non-emissive materials don't emit anything
@@ -71,19 +81,18 @@ class lambertian(material):
 			cosine = 0.0
 		return cosine/math.pi
 	# now returns True, (scattered,albedo and pdf)
-	def scatter(self,r_in: ray, rec):
-		#uvw = onb()
-		self.uvw.build_from_w(rec.normal)
-		direction = self.uvw.local(random_cosine_direction())
-		scattered = ray(rec.p,unit_vector(direction),r_in.time)
-		alb = self.albedo.value(rec.u,rec.v,rec.p)
-		pdf = (self.uvw.axis[2].dot(scattered.direction)) / math.pi
-		return True,(scattered,alb,pdf)
-		# target = rec.p + rec.normal + random_unit_sphere()
-		# scattered = ray(rec.p,unit_vector(target-rec.p),r_in.time)
+	def scatter(self,r_in: ray, hrec):
+		# self.uvw.build_from_w(rec.normal)
+		# direction = self.uvw.local(random_cosine_direction())
+		# scattered = ray(rec.p,unit_vector(direction),r_in.time)
 		# alb = self.albedo.value(rec.u,rec.v,rec.p)
-		# pdf = (rec.normal.dot(scattered.direction))/math.pi
-		# return True,(scattered,alb,pdf)
+		# pdf = (self.uvw.axis[2].dot(scattered.direction)) / math.pi
+		srec = scatter_rec()
+		srec.is_specular = False
+		srec.attenuation = self.albedo.value(hrec.u,hrec.v,hrec.p)
+		srec.prob_density = cosine_pdf(hrec.normal)	
+
+		return True,srec
 
 class metal(material):
 	def __init__(self,albedo: vec3,f: float = 0.0):
@@ -92,48 +101,56 @@ class metal(material):
 		else:
 			self.fuzz = 1.0
 		self.albedo = albedo
-	def scatter(self,r_in: ray, rec):
-		reflected = reflect(unit_vector(r_in.direction),rec.normal)
-		scattered = ray(rec.p,reflected + self.fuzz * random_unit_sphere(),r_in.time)
-		attenuation = self.albedo
-		return scattered.direction.dot(rec.normal) > 0,(scattered,attenuation)
+	def scatter(self,r_in: ray, hrec):
+		srec = scatter_rec()
+		reflected = reflect(unit_vector(r_in.direction),hrec.normal)
+		srec.specular_ray = ray(hrec.p,reflected + self.fuzz * random_unit_sphere())
+		srec.attenuation = self.albedo
+		srec.is_specular = True
+		srec.prob_density = 0.0
+		return True,srec
 
 class dielectric(material):
 	def __init__(self,ri: float):
 		self.ref_idx = ri
-	def scatter(self,r_in: ray, rec):
+	def scatter(self,r_in: ray, hrec):
+		srec = scatter_rec()
+		srec.is_specular = True
+		srec.prob_density = 0
+		srec.attenuation = vec3(1.0,1.0,1.0)
+
 		outward_normal = None
 		ni_over_nt = None
 		refracted = None;
 		scattered = None;
-		reflected = reflect(r_in.direction,rec.normal)
+		reflected = reflect(r_in.direction,hrec.normal)
 		attenuation = vec3(1.0,1.0,1.0)
 		reflect_prob = None
 		cosine = None
 
-		if(r_in.direction.dot(rec.normal) > 0):
-			outward_normal = -rec.normal
+		if(r_in.direction.dot(hrec.normal) > 0):
+			outward_normal = -hrec.normal
 			ni_over_nt = self.ref_idx
-			cosine = self.ref_idx * r_in.direction.dot(rec.normal) / r_in.direction.length()
+			cosine = self.ref_idx * r_in.direction.dot(hrec.normal) / r_in.direction.length()
 		else:
-			outward_normal = rec.normal
+			outward_normal = hrec.normal
 			ni_over_nt = 1.0/self.ref_idx
-			cosine = -r_in.direction.dot(rec.normal) / r_in.direction.length()
+			cosine = -r_in.direction.dot(hrec.normal) / r_in.direction.length()
 
 		if_refract,refracted = refract(r_in.direction,outward_normal,ni_over_nt)
 		if if_refract:
 			reflect_prob = schlick(cosine,self.ref_idx)
 			#scattered = ray(rec.p,refracted)
 		else:
-			scattered = ray(rec.p,reflected,r_in.time)
+			#scattered = ray(hrec.p,reflected,r_in.time)
 			reflect_prob = 1.0
 			#return False, (scattered,attenuation)
 		if random.random() < reflect_prob:
-			scattered = ray(rec.p,reflected,r_in.time)
+			srec.specular_ray = ray(hrec.p,reflected,r_in.time)
 		else: 
-			scattered = ray(rec.p,refracted,r_in.time)
+			srec.specular_ray = ray(hrec.p,refracted,r_in.time)
 
-		return True,(scattered,attenuation)
+		return True,srec
 
 '''
 

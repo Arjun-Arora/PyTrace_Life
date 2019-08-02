@@ -6,12 +6,13 @@ from material import *
 from math import pi,sin,cos
 FLT_MAX = sys.float_info.max
 import copy 
+import random
 sys.setrecursionlimit(1500)
 
 '''
 replacement for hit_record struct 
 '''
-class hit_record:
+class hit_record(ABC):
 	def __init__(self,t: float = 0.0,p_vec: vec3 = vec3(0,0,0),
 					 normal: vec3 = vec3(0,0,0),mat = None,
 					 u: float = 0.0,v:float = 0.0):
@@ -112,6 +113,17 @@ class hitable_list(hitable):
 			else: 
 				return (False,box)
 		return (True,box)
+	def pdf_value(self,o: vec3,v: vec3):
+		weight = 1.0/len(self.object_list)
+		tot_sum = 0
+		for i in range(len(self.object_list)):
+			#print (self.object_list[i])
+			tot_sum += weight * self.object_list[i].pdf_value(o,v)
+		return tot_sum
+	def random_gen(self,o: vec3):
+		idx = int(random.random() * len(self.object_list))
+		return self.object_list[idx].random_gen(o)
+
 
 #returns x,y or z value of hitable to sort bvh depending on axis 
 def box_x_val(a: hitable):

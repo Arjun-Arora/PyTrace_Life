@@ -18,26 +18,35 @@ import matplotlib.pyplot as plt
 import cProfile
 MAX_FLOAT = sys.float_info.max
 
-def color(r: ray, world: list,depth = 0,max_depth = 4):
-    rec = hit_record()
-    hit_anything,rec = hitable_list(world).hit(r,0.001,MAX_FLOAT)
+def de_nan(c: vec3): 
+    if math.isnan(c[0]):
+        c[0] = 0
+    if math.isnan(c[1]):
+        c[1] = 0
+    if math.isnan(c[2]):
+        c[2] = 0
+    return c 
+def color(r: ray, world: hitable, light_shape: hitable, depth = 0,max_depth = 4):
+    hit_anything,hrec = world.hit(r,0.001,MAX_FLOAT)
     if (hit_anything):
-        scattered = ray(vec3(0,0,0),vec3(0,0,0),0.0)
-        albedo = vec3(0,0,0)
-        pdf_val = 0.0
-        if_scatter,(scattered,albedo,pdf_val) = rec.mat.scatter(r,rec)
-        emitted = rec.mat.emitted(r,rec,rec.u,rec.v,rec.p)
+        #scattered = ray(vec3(0,0,0),vec3(0,0,0),0.0)
+        # albedo = vec3(0,0,0)
+        # pdf_val = 0.0
+        # if_scatter,(scattered,albedo,pdf_val) = rec.mat.scatter(r,rec)
+        emitted = hrec.mat.emitted(r,hrec,hrec.u,hrec.v,hrec.p)
+        print
+        if_scatter,srec = hrec.mat.scatter(r,hrec)
         if (depth < max_depth and if_scatter):
+            if srec.is_specular:
+                return srec.attenuation * color(srec.specular_ray,world,light_shape,depth + 1,max_depth)
+            plight = hitable_pdf(light_shape,hrec.p)
 
-            light_shape = xz_rect(213,343,227,332,554,0)
-            p0 = hitable_pdf(light_shape,rec.p)
-            p1 = cosine_pdf(rec.normal)
-            p = mixture_pdf(p0,p1)
-            scattered = ray(rec.p,p.generate(),r.time)
+            p = mixture_pdf(plight,srec.prob_density)
+            scattered = ray(hrec.p,p.generate(),r.time)
             pdf_val = p.value(scattered.direction)
-            scattering_pdf = rec.mat.scattering_pdf(r,rec,scattered)
+            scattering_pdf = hrec.mat.scattering_pdf(r,hrec,scattered)
 
-            return emitted + albedo * scattering_pdf * color( scattered,world,depth + 1,max_depth) / pdf_val
+            return emitted + srec.attenuation * scattering_pdf * color( scattered,world, light_shape, depth + 1,max_depth) / pdf_val
         else:
             return emitted
     else:
@@ -53,6 +62,9 @@ def main(filename: str = 'output',output_res: tuple = (200,100),num_samples= 100
     R = math.cos(math.pi/4)
     aspect_ratio = float(nx)/float(ny)
     hit_object_list,cam = cornell_box(aspect_ratio)
+    light_shape = xz_rect(213,343,227,332,554,0)
+    glass_sphere = sphere(vec3(190,90,190),90,0)
+    sample_list = hitable_list([light_shape,glass_sphere])
     #hit_object_list,cam = random_scene(aspect_ratio)
     seed = 123
     sampler = uniform_sampler_2D(seed)
@@ -68,7 +80,7 @@ def main(filename: str = 'output',output_res: tuple = (200,100),num_samples= 100
                     s = (i + u)/nx
                     t = (j + v)/ny
                     r = cam.get_ray(s,t)
-                    col += color(r,hit_object_list,depth = 0,max_depth = 4)
+                    col += de_nan(color(r,hitable_list(hit_object_list),sample_list,depth = 0,max_depth = 4))
                 col /= float(num_samples)
                 #col = vec3(math.sqrt(col[0]),math.sqrt(col[1]),math.sqrt(col[2]))
                 ir = 255.99 * math.sqrt(col[0]);
@@ -89,9 +101,9 @@ def main(filename: str = 'output',output_res: tuple = (200,100),num_samples= 100
 if  __name__ == "__main__":
     #main("./test_large",output_res = (800,800),num_samples = 1024)
     #main("./test_medium",output_res = (500,500),num_samples = 1024)
-    #main("./test_small",output_res = (400,300),num_samples = 1024)
-    #main("./test_large_imp",output_res = (1200,800),num_samples = 10)
     main("./test_small",output_res = (400,300),num_samples = 1024)
+    #main("./test_large_imp",output_res = (1200,800),num_samples = 10)
+    #main("./test_small",output_res = (400,300),num_samples = 256)
 
 
 

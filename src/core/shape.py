@@ -3,6 +3,7 @@ from hitable import *
 import math
 from geometry import *
 from material import * 
+from random_functions import * 
 FLT_MAX = sys.float_info.max
 import random
 
@@ -20,6 +21,7 @@ class sphere(hitable):
 		self.center = center
 		self.radius = radius
 		self.mat = mat
+		self.uvw = onb()
 	def hit(self,r: ray , t_min: float,t_max: float):
 		rec = hit_record()
 		rec.mat = self.mat
@@ -51,8 +53,20 @@ class sphere(hitable):
 		box = aabb(self.center - vec3(self.radius,self.radius,self.radius),
 				  self.center + vec3(self.radius,self.radius,self.radius))
 		return (True,box);
-
-
+	def pdf_value(self,o: vec3, v: vec3):
+		rec = hit_record()
+		is_hit,rec = self.hit(ray(o,v),0.001,FLT_MAX)
+		if is_hit:
+			cos_theta_max = math.sqrt(1 - self.radius * self.radius/((self.center - o).squared_length()))
+			solid_angle = 2 * math.pi * (1-cos_theta_max)
+			return 1 / solid_angle
+		else:
+			return 0
+	def random_gen(self,o: vec3):
+		direction = self.center - o 
+		distance_squared = direction.squared_length()
+		self.uvw.build_from_w(direction)
+		return self.uvw.local(random_to_sphere(self.radius,distance_squared))
 
 
 class moving_sphere(hitable):
@@ -161,6 +175,8 @@ class xz_rect(hitable):
 		return (True,box)
 	def pdf_value(self,o: vec3, v: vec3):
 		rec = hit_record()
+		# print(o)
+		# print(v)
 		is_hit,rec = self.hit(ray(o,v),0.001,FLT_MAX)
 		if is_hit:
 			area = (self.x1-self.x0) * (self.z1-self.z0)
