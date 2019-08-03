@@ -34,13 +34,11 @@ def color(r: ray, world: hitable, light_shape: hitable, depth = 0,max_depth = 4)
         # pdf_val = 0.0
         # if_scatter,(scattered,albedo,pdf_val) = rec.mat.scatter(r,rec)
         emitted = hrec.mat.emitted(r,hrec,hrec.u,hrec.v,hrec.p)
-        print
         if_scatter,srec = hrec.mat.scatter(r,hrec)
         if (depth < max_depth and if_scatter):
             if srec.is_specular:
                 return srec.attenuation * color(srec.specular_ray,world,light_shape,depth + 1,max_depth)
             plight = hitable_pdf(light_shape,hrec.p)
-
             p = mixture_pdf(plight,srec.prob_density)
             scattered = ray(hrec.p,p.generate(),r.time)
             pdf_val = p.value(scattered.direction)

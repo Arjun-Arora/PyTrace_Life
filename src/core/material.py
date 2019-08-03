@@ -107,7 +107,7 @@ class metal(material):
 		srec.specular_ray = ray(hrec.p,reflected + self.fuzz * random_unit_sphere())
 		srec.attenuation = self.albedo
 		srec.is_specular = True
-		srec.prob_density = 0.0
+		srec.prob_density = None
 		return True,srec
 
 class dielectric(material):
@@ -116,7 +116,7 @@ class dielectric(material):
 	def scatter(self,r_in: ray, hrec):
 		srec = scatter_rec()
 		srec.is_specular = True
-		srec.prob_density = 0
+		srec.prob_density = None
 		srec.attenuation = vec3(1.0,1.0,1.0)
 
 		outward_normal = None
