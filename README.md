@@ -1,4 +1,4 @@
-# PyTrace
+# PyTrace_Life
 
 ![image2](./references/cornell_box_imp.png)
 
@@ -23,7 +23,7 @@ dependencies include:
 7. pypy3 main.py 
 Technically, you can run w/o pypy3 installed but it is very slow w/o the JIT compilation, as seen below 
 
-## Benchmarks: 
+## PyTrace_Life Benchmark: 
 Note: Iterations per second are how many output pixels are processed per second 
 
 ### W/ Cornell Box Importance Sampled
