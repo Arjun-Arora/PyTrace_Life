@@ -25,4 +25,16 @@ Technically, you can run w/o pypy3 installed but it is very slow w/o the JIT com
 
 ## Benchmarks: 
 Note: Iterations per second are how many output pixels are processed per second 
+
+### W/ Cornell Box Importance Sampled
+
+2048 spp 
+
+800 x 800 
+
+Standard Implmentation w/ PyPy
+
+avg: 110.09 it/s 
+
+time: 1:36:53
  

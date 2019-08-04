@@ -117,8 +117,7 @@ class dielectric(material):
 		srec = scatter_rec()
 		srec.is_specular = True
 		srec.prob_density = None
-		srec.attenuation = vec3(1.0,1.0,1.0)
-
+ 
 		outward_normal = None
 		ni_over_nt = None
 		refracted = None;
@@ -183,13 +182,13 @@ isotropic function
 
 '''
 
-class isotropic(material):
-	def __init__(self,a: texture):
-		self.albedo = a 
-	def scatter(self,r_in: ray, rec):
-		scattered = ray(rec.p,random_unit_sphere(),r_in.time)
-		attenuation = self.albedo.value(rec.u,rec.v,rec.p)
-		return True,(scattered,attenuation)
+# class isotropic(material):
+# 	def __init__(self,a: texture):
+# 		self.albedo = a 
+# 	def scatter(self,r_in: ray, rec):
+# 		scattered = ray(rec.p,random_unit_sphere(),r_in.time)
+# 		attenuation = self.albedo.value(rec.u,rec.v,rec.p)
+# 		return True,(scattered,attenuation)
 
 
 
