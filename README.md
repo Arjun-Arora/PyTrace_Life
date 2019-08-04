@@ -1,6 +1,6 @@
 # PyTrace
 
-![image2](./references/final_scene.png)
+![image2](./references/cornell_box_imp.png)
 
 A (nearly) pure Ray Tracing Project for Python
 
