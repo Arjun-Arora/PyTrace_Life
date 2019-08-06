@@ -1,12 +1,8 @@
 from geometry import * 
 from math import *
 import random
+from random_functions import * 
 
-def random_in_unit_disk():
-	p = vec3(1.0,1.0,1.0)
-	while p.dot(p) >= 1.0:
-		p = 2.0 * vec3(random.random(),random.random(),0) - vec3(1,1,0)
-	return p
 class camera:
 	def __init__(self,lookfrom: vec3,lookat: vec3, vup: vec3,
 					  vfov: float,aspect: float, aperture: float, focus_dist: float,t0: float,t1: float):
