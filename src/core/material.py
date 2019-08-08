@@ -124,6 +124,8 @@ class dielectric(material):
 		scattered = None;
 		reflected = reflect(r_in.direction,hrec.normal)
 		attenuation = vec3(1.0,1.0,1.0)
+
+		srec.attenuation = attenuation
 		reflect_prob = None
 		cosine = None
 

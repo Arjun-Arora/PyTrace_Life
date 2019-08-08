@@ -99,7 +99,7 @@ def main(filename: str = 'output',output_res: tuple = (200,100),num_samples= 100
 if  __name__ == "__main__":
     #main("./test_large_2048",output_res = (800,800),num_samples = 2048)
     #main("./test_medium_1024",output_res = (500,500),num_samples = 1024)
-    #main("./test_small_1024",output_res = (400,300),num_samples = 1024)
+    main("./test_small_1024",output_res = (400,300),num_samples = 1024)
     #main("./test_small_256",output_res = (400,300),num_samples = 256)
 
 
